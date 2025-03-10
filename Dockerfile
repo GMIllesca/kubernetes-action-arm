@@ -1,4 +1,4 @@
-FROM arm64v8/alpine:latest
+FROM alpine@sha256:757d680068d77be46fd1ea20fb21db16f150468c5e7079a08a2e4705aec096ac
 
 # Install minimal dependencies
 RUN apk add --no-cache \
@@ -7,7 +7,7 @@ RUN apk add --no-cache \
     ca-certificates
 
 # Install kubectl
-RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/arm64/kubectl" && \
+RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/amd64/kubectl" && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/
 
