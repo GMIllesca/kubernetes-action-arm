@@ -11,38 +11,7 @@ inputs:
     required: true
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Docker layer caching
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile', 'requirements.txt', 'entrypoint.sh') }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
-
-    - name: Build and load Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        load: true
-        tags: kubernetes-action-arm:latest
-        platforms: linux/arm64
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-        build-args: |
-          KUBECTL_VERSION=v1.28.4
-
-    - name: Move cache
-      shell: bash
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-    - name: Run kubectl command
-      uses: docker://kubernetes-action-arm:latest
-      with:
-        args: ${{ inputs.args }} 
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.args }} 
