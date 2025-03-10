@@ -1,25 +1,30 @@
-FROM ubuntu:20.04
+FROM python:3.9-slim
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    ca-certificates \
     curl \
-    python3 \
-    python3-pip \
-    python3-setuptools \
-    python3-wheel \
+    ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install AWS CLI
-RUN pip3 install --no-cache-dir awscli
+RUN pip3 install --no-cache-dir \
+    awscli \
+    setuptools \
+    wheel
 
 # Install kubectl
-RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/$(dpkg --print-architecture)/kubectl" && \
+RUN arch=$(dpkg --print-architecture) && \
+    case ${arch} in \
+        "arm64") arch="arm64" ;; \
+        "amd64") arch="amd64" ;; \
+        *) echo "Unsupported architecture: ${arch}" && exit 1 ;; \
+    esac && \
+    curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/${arch}/kubectl" && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/
 
