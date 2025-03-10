@@ -3,6 +3,10 @@ FROM debian:bullseye-slim
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Set environment variables for buildkit
+ENV DOCKER_BUILDKIT=1
+ENV BUILDKIT_PROGRESS=plain
+
 # Debug information
 RUN echo "Architecture: $(uname -m)" && \
     echo "OS: $(uname -a)" && \
@@ -39,19 +43,18 @@ RUN set -x && \
     setuptools \
     wheel
 
-# Download and install kubectl with debug
-RUN set -x && \
-    ARCH=$(uname -m) && \
-    echo "Detected architecture: ${ARCH}" && \
-    case ${ARCH} in \
-        x86_64) ARCH="amd64" ;; \
-        aarch64) ARCH="arm64" ;; \
-        *) echo "Unsupported architecture: ${ARCH}" && exit 1 ;; \
-    esac && \
-    echo "Kubectl architecture to use: ${ARCH}" && \
-    curl -v -LO "https://storage.googleapis.com/kubernetes-release/release/v1.28.4/bin/linux/${ARCH}/kubectl" && \
-    chmod +x kubectl && \
-    mv kubectl /usr/local/bin/
+# Install kubectl directly from binary
+COPY --chmod=755 <<EOF /usr/local/bin/install-kubectl.sh
+#!/bin/sh
+set -e
+ARCH=\$(dpkg --print-architecture)
+curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/\${ARCH}/kubectl"
+chmod +x kubectl
+mv kubectl /usr/local/bin/
+EOF
+
+RUN /usr/local/bin/install-kubectl.sh && \
+    rm /usr/local/bin/install-kubectl.sh
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
