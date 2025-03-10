@@ -1,4 +1,4 @@
-FROM arm64v8/alpine:3.18
+FROM arm64v8/alpine:latest
 
 # Install minimal dependencies
 RUN apk add --no-cache \
