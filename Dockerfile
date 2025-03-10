@@ -1,22 +1,13 @@
-FROM ubuntu:20.04
+FROM arm64v8/alpine:3.18
 
-# Avoid prompts from apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install basic dependencies in a single layer
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3-minimal \
-    python3-pip \
+# Install minimal dependencies
+RUN apk add --no-cache \
+    bash \
     curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install AWS CLI
-RUN pip3 install --no-cache-dir awscli
+    ca-certificates
 
 # Install kubectl
-RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/$(dpkg --print-architecture)/kubectl" && \
+RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/arm64/kubectl" && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/
 
