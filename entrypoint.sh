@@ -6,7 +6,7 @@ echo "Container Architecture: $(uname -m)"
 echo "Container OS: $(uname -a)"
 echo "Container OS Release: $(cat /etc/os-release)"
 
-# Decode KUBE_CONFIG_DATA
+# Decode KUBE_CONFIG_DATA if provided
 if [ -n "$KUBE_CONFIG_DATA" ]; then
     echo "Setting up kubectl configuration..."
     echo "$KUBE_CONFIG_DATA" | base64 -d > /tmp/kubeconfig

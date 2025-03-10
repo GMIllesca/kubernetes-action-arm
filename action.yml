@@ -14,8 +14,6 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   env:
-    DOCKER_BUILDKIT: "1"
-    BUILDKIT_PROGRESS: "plain"
-    BUILDX_PLATFORM: "linux/amd64,linux/arm64"
+    DOCKER_BUILDKIT: "0"
   args:
     - ${{ inputs.args }} 

@@ -1,60 +1,24 @@
-FROM debian:bullseye-slim
+FROM ubuntu:20.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Set environment variables for buildkit
-ENV DOCKER_BUILDKIT=1
-ENV BUILDKIT_PROGRESS=plain
-
-# Debug information
-RUN echo "Architecture: $(uname -m)" && \
-    echo "OS: $(uname -a)" && \
-    cat /etc/os-release
-
-# Update package list
-RUN set -x && \
-    apt-get update
-
-# Install certificates first
-RUN set -x && \
-    apt-get install -y --no-install-recommends ca-certificates && \
-    apt-get clean
-
-# Install curl
-RUN set -x && \
-    apt-get install -y --no-install-recommends curl && \
-    apt-get clean
-
-# Install Python
-RUN set -x && \
+# Install basic dependencies in a single layer
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3-minimal \
-    python3-pip && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    python3 --version && \
-    pip3 --version
+    python3-pip \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install AWS CLI with debug
-RUN set -x && \
-    pip3 install --no-cache-dir --verbose \
-    awscli \
-    setuptools \
-    wheel
+# Install AWS CLI
+RUN pip3 install --no-cache-dir awscli
 
-# Install kubectl directly from binary
-COPY --chmod=755 <<EOF /usr/local/bin/install-kubectl.sh
-#!/bin/sh
-set -e
-ARCH=\$(dpkg --print-architecture)
-curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/\${ARCH}/kubectl"
-chmod +x kubectl
-mv kubectl /usr/local/bin/
-EOF
-
-RUN /usr/local/bin/install-kubectl.sh && \
-    rm /usr/local/bin/install-kubectl.sh
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/$(dpkg --print-architecture)/kubectl" && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
