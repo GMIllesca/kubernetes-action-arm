@@ -1,10 +1,7 @@
-FROM --platform=linux/arm64 ubuntu:22.04
+FROM ubuntu:20.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Set default shell to bash with pipefail option
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install dependencies
 RUN apt-get update && \
@@ -21,14 +18,10 @@ RUN apt-get update && \
 # Install AWS CLI
 RUN pip3 install --no-cache-dir awscli
 
-# Verify AWS CLI installation
-RUN aws --version
-
-# Install kubectl for ARM64
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl" && \
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/v1.28.4/bin/linux/$(dpkg --print-architecture)/kubectl" && \
     chmod +x kubectl && \
-    mv kubectl /usr/local/bin/ && \
-    kubectl version --client
+    mv kubectl /usr/local/bin/
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
