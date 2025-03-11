@@ -1,4 +1,4 @@
-FROM alpine@sha256:757d680068d77be46fd1ea20fb21db16f150468c5e7079a08a2e4705aec096ac
+FROM alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 
 # Install minimal dependencies
 RUN apk add --no-cache \
